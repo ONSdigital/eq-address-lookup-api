@@ -1,9 +1,10 @@
-# eQ Address API
+# eQ Address Lookup API
 
 EQ address lookup API provides a simple request service that will return a list of addresses from the Address Index.
 
-You can either build and run a docker container or run in a virtual environment**.  First, clone the repo:
+You can either build and run a docker container or run in a virtual environment. 
 
+First, clone the repo:
   ```bash
    $ git clone https://github.com/ONSdigital/eq-address-lookup-api.git
    ```
