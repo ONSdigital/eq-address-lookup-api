@@ -1,6 +1,6 @@
 # eQ Address Lookup API
 
-EQ address lookup API provides a simple request service that will return a list of addresses from the Address Index.
+EQ Address Lookup API provides a simple request service that will return a list of addresses from the Address Index.
 
 You can either build and run a docker container or run in a virtual environment. 
 
