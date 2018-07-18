@@ -1,10 +1,8 @@
 import re
 import json
 import requests
+from app import settings
 
-address_lookup_url = 'http://addressindex-api-dev.apps.devtest.onsclofo.uk/addresses'
-result_limit = '100'
-request_timeout = 30
 
 def query_address_index(search_value):
     '''
@@ -16,14 +14,14 @@ def query_address_index(search_value):
                 r'|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])'
                 r'|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z]))))\s?[0-9][A-Za-z]{2})', search_value):
         # Postcode search
-        request_string = address_lookup_url + '/postcode/' + search_value
+        request_string = "/".join((settings.LOOKUP_URL, 'ai', 'v1', 'addresses', 'postcode', search_value))
     else:
-        request_string = address_lookup_url + '?input=' + search_value + ';limit=' + result_limit
+        request_string = "/".join((settings.LOOKUP_URL, 'ai', 'v1', 'addresses?input=' + search_value + ';limit=' + settings.RESULT_LIMIT))
 
-    try:
-        resp = requests.get(request_string, timeout=request_timeout)
-    except (requests.exceptions.ReadTimeout):
-        return ["ADDRESS INDEX API REQUEST TIMED OUT"]
+
+    resp = requests.get(request_string,
+                        timeout=(settings.REQUEST_CONNECTION_TIMEOUT,
+                                 settings.REQUEST_READ_TIMEOUT))
 
     if resp.status_code != 200:
         # This means something went wrong.

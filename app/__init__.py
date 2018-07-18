@@ -1,3 +1,4 @@
+import requests
 from flask import request, redirect, url_for
 from flask_api import FlaskAPI
 from . request_address import query_address_index
@@ -12,8 +13,15 @@ def root():
 def address_search():
     query = request.args.get('q')
     if query:
-        addresses = query_address_index(query)
-        return dict(addresses=addresses, count=len(addresses))
+        try:
+            addresses = query_address_index(query)
+            return dict(addresses=addresses, count=len(addresses))
+        except requests.exceptions.ConnectionError:
+            return 'ADDRESS INDEX API CONNECTION ERROR', 503
+        except requests.exceptions.ConnectTimeout:
+            return "ADDRESS INDEX API CONNECTION TIMED OUT", 503
+        except requests.exceptions.ReadTimeout:
+            return "ADDRESS INDEX API READ TIMED OUT", 408
     else:
         return "Enter address_api/?q=Address"
 
