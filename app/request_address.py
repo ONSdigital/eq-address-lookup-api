@@ -2,6 +2,9 @@ import re
 import json
 import requests
 from app import settings
+from structlog import get_logger
+
+logger = get_logger()
 
 
 def query_address_index(search_value):
@@ -18,10 +21,16 @@ def query_address_index(search_value):
     else:
         request_string = "/".join((settings.LOOKUP_URL, 'ai', 'v1', 'addresses?input=' + search_value + ';limit=' + settings.RESULT_LIMIT))
 
+    headers = {
+        'Authorization': settings.AUTH_KEY
+    }
+
+    logger.info("Request data from address index", url=request_string)
 
     resp = requests.get(request_string,
                         timeout=(settings.REQUEST_CONNECTION_TIMEOUT,
-                                 settings.REQUEST_READ_TIMEOUT))
+                                 settings.REQUEST_READ_TIMEOUT),
+                        headers=headers)
 
     if resp.status_code != 200:
         # This means something went wrong.

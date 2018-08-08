@@ -1,5 +1,5 @@
 import requests
-from flask import request, redirect, url_for
+from flask import request, redirect, url_for, json
 from flask_api import FlaskAPI
 from . request_address import query_address_index
 
@@ -8,6 +8,13 @@ app = FlaskAPI(__name__)
 @app.route('/', methods=['GET'])
 def root():
     return redirect(url_for('address_search'))
+
+@app.route('/status')
+def status():
+    data = {
+        'status': 'OK'
+    }
+    return json.dumps(data)
 
 @app.route('/address_api/', methods=['GET'])
 def address_search():
