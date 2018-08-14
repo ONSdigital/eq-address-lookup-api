@@ -34,7 +34,7 @@ def query_address_index(search_value):
 
     if resp.status_code != 200:
         # This means something went wrong.
-        return ["ERROR IN ADDRESS INDEX API (try refresh). Reason: " + resp.reason]
+        raise Exception("ERROR IN ADDRESS INDEX API (try refresh). Reason: {}. Response: {}".format(resp.reason, resp.text))
 
     return get_addresses(resp)
 
