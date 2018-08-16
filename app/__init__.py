@@ -1,9 +1,11 @@
 import requests
 from flask import request, redirect, url_for, json
 from flask_api import FlaskAPI
+from flask_cors import CORS
 from . request_address import query_address_index
 
 app = FlaskAPI(__name__)
+CORS(app)
 
 @app.route('/', methods=['GET'])
 def root():
@@ -29,6 +31,8 @@ def address_search():
             return "ADDRESS INDEX API CONNECTION TIMED OUT", 503
         except requests.exceptions.ReadTimeout:
             return "ADDRESS INDEX API READ TIMED OUT", 408
+        except Exception as exception:
+            return str(exception), 500
     else:
         return "Enter address_api/?q=Address"
 
