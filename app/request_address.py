@@ -17,9 +17,10 @@ def query_address_index(search_value):
                 r'|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])'
                 r'|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z]))))\s?[0-9][A-Za-z]{2})', search_value):
         # Postcode search
-        request_string = "/".join((settings.LOOKUP_URL, 'ai', 'v1', 'addresses', 'postcode', search_value))
+        request_string = "/".join((settings.LOOKUP_URL, 'addresses', 'postcode', search_value))
     else:
-        request_string = "/".join((settings.LOOKUP_URL, 'ai', 'v1', 'addresses?input=' + search_value + ';limit=' + settings.RESULT_LIMIT))
+        request_string = "/".join(
+            (settings.LOOKUP_URL, 'addresses', 'partial', search_value + '?limit=' + settings.RESULT_LIMIT))
 
     headers = {
         'Authorization': settings.AUTH_KEY
