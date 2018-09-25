@@ -22,10 +22,11 @@ def before_request():
 
 @app.after_request
 def after_request(response):
-    lookup_api_response_time = time.time() - g.request_start_time
-    logger.info("Request Complete",
-                lookup_api_response_time=lookup_api_response_time,
-                lookup_api_processing_time=lookup_api_response_time - g.address_index_response_time)
+    if g.get('request_start_time') and g.get('address_index_response_time'):
+        lookup_api_response_time = time.time() - g.request_start_time
+        logger.info("Request Complete",
+                    lookup_api_response_time=lookup_api_response_time,
+                    lookup_api_processing_time=lookup_api_response_time - g.address_index_response_time)
     return response
 
 
