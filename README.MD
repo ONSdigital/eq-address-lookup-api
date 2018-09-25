@@ -19,12 +19,8 @@ First, clone the repo:
 - Install Docker for your system: https://www.docker.com/
 - Build and run the Docker image (make sure you are in the directory of the cloned repo):
   ```bash
-   $ docker build ../eq-address-lookup-api
-     ...
-     Step 11/11 : COPY . /usr/src/app
-     ---> 00b93410be43
-     Successfully built 12x34567xx89
-   $ docker run -it -p 6030:6030 12x34567xx89
+   $ docker build -t onsdigital/eq-address-lookup-api .
+   $ docker run -it -p 6030:6030 onsdigital/eq-address-lookup-api
    ```
 
 ## Run in a virtual environment
