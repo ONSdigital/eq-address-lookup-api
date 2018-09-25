@@ -12,7 +12,7 @@ First, clone the repo:
 ## Run a docker container
 - Pull from docker hub and run: 
   ```bash
-  $ docker run -it -p 6030:6030 onsdigital/eq-address-lookup-api
+  $ docker run -it -p 6030:6030 -e LOOKUP_URL=https://service.uk -e AUTH_KEY=test_key onsdigital/eq-address-lookup-api
   ```
  
 ## Build and run a Docker container
@@ -20,7 +20,7 @@ First, clone the repo:
 - Build and run the Docker image (make sure you are in the directory of the cloned repo):
   ```bash
    $ docker build -t onsdigital/eq-address-lookup-api .
-   $ docker run -it -p 6030:6030 onsdigital/eq-address-lookup-api
+   $ docker run -it -p 6030:6030 -e LOOKUP_URL=https://service.uk -e AUTH_KEY=test_key onsdigital/eq-address-lookup-api
    ```
 
 ## Run in a virtual environment
