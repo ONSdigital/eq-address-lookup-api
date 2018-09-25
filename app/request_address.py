@@ -1,6 +1,10 @@
 import re
 import json
+import time
+
 import requests
+from flask import g
+
 from app import settings
 from structlog import get_logger
 
@@ -28,10 +32,13 @@ def query_address_index(search_value):
 
     logger.info("Request data from address index", url=request_string)
 
+    address_index_request_start = time.time()
     resp = requests.get(request_string,
                         timeout=(settings.REQUEST_CONNECTION_TIMEOUT,
                                  settings.REQUEST_READ_TIMEOUT),
                         headers=headers)
+    g.address_index_response_time = time.time() - address_index_request_start
+    logger.bind(address_index_response_time=g.address_index_response_time)
 
     if resp.status_code != 200:
         # This means something went wrong.

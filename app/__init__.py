@@ -1,15 +1,38 @@
+import time
+
 import requests
-from flask import request, redirect, url_for, json
+from flask import request, redirect, url_for, json, g
 from flask_api import FlaskAPI
 from flask_cors import CORS
-from . request_address import query_address_index
+from structlog import get_logger
+
+from app.request_address import query_address_index
+
+logger = get_logger()
+
 
 app = FlaskAPI(__name__)
 CORS(app)
 
+
+@app.before_request
+def before_request():
+    g.request_start_time = time.time()
+
+
+@app.after_request
+def after_request(response):
+    lookup_api_response_time = time.time() - g.request_start_time
+    logger.info("Request Complete",
+                lookup_api_response_time=lookup_api_response_time,
+                lookup_api_processing_time=lookup_api_response_time - g.address_index_response_time)
+    return response
+
+
 @app.route('/', methods=['GET'])
 def root():
     return redirect(url_for('address_search'))
+
 
 @app.route('/status')
 def status():
@@ -17,6 +40,7 @@ def status():
         'status': 'OK'
     }
     return json.dumps(data)
+
 
 @app.route('/address_api/', methods=['GET'])
 def address_search():
