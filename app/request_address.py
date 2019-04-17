@@ -29,10 +29,12 @@ def query_address_index(search_value):
     logger.info("Request data from address index", url=request_string)
 
     address_index_request_start = time.time()
+    headers = {"content-type": "application/json"}
     resp = requests.get(request_string,
                         timeout=(settings.REQUEST_CONNECTION_TIMEOUT,
                                  settings.REQUEST_READ_TIMEOUT),
-                        auth=(settings.AUTH_KEY, ''))
+                        auth=(settings.AUTH_KEY, ''),
+                        headers=headers)
     g.address_index_response_time = time.time() - address_index_request_start
     logger.bind(address_index_response_time=g.address_index_response_time)
 
