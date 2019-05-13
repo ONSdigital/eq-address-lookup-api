@@ -1,5 +1,5 @@
 def sort_address_results(addresses, postcode):
-    '''
+    """
     # Not to be used. Address Index API should sort for us.
     If required address object should include the following fields:
 
@@ -14,8 +14,7 @@ def sort_address_results(addresses, postcode):
         'underlyingScore': address['underlyingScore']
     })
 
-
-    '''
+    """
     number_of_results = len(addresses)
     if postcode or number_of_results < 40:
         sorted_addresses = sorted(addresses, key=lambda k: k['number'])

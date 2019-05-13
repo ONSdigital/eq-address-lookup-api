@@ -19,17 +19,19 @@ def query_address_index(search_value):
     """
     if re.match(r'([Gg][Ii][Rr] 0[Aa]{2})|((([A-Za-z][0-9]{1,2})'
                 r'|(([A-Za-z][A-Ha-hJ-Yj-y][0-9]{1,2})|(([A-Za-z][0-9][A-Za-z])'
-                r'|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z]))))\s?[0-9][A-Za-z]{2})', search_value):
+                r'|([A-Za-z][A-Ha-hJ-Yj-y][0-9]?[A-Za-z]))))\s?[0-9][A-Za-z]{2})',
+                search_value):
         # Postcode search
-        request_string = "/".join((settings.LOOKUP_URL, 'addresses', 'postcode', search_value))
+        request_string = f'{settings.LOOKUP_URL}/addresses/postcode/{search_value}'
     else:
-        request_string = "/".join(
-            (settings.LOOKUP_URL, 'addresses', 'partial?input=' + search_value + '&limit=' + settings.RESULT_LIMIT))
+        request_string = f'{settings.LOOKUP_URL}/addresses/partial'\
+            f'?input={search_value}'\
+            f'&limit={settings.RESULT_LIMIT}'
 
-    logger.info("Request data from address index", url=request_string)
+    logger.info('Request data from address index', url=request_string)
 
     address_index_request_start = time.time()
-    headers = {"content-type": "application/json"}
+    headers = {'content-type': 'application/json'}
     resp = requests.get(request_string,
                         timeout=(settings.REQUEST_CONNECTION_TIMEOUT,
                                  settings.REQUEST_READ_TIMEOUT),
@@ -40,10 +42,10 @@ def query_address_index(search_value):
 
     if resp.status_code != 200:
         # This means something went wrong.
-        raise Exception("ERROR IN ADDRESS INDEX API (try refresh). Reason: {}. Response: {}".format(resp.reason,
-                                                                                                    resp.text))
+        raise Exception('ERROR IN ADDRESS INDEX API (try refresh).'
+                        f' Reason: {resp.reason}. Response: {resp.text}')
 
-    return get_addresses(resp)
+    return dict(addresses=get_addresses(resp), time=g.address_index_response_time)
 
 
 def get_addresses(resp):

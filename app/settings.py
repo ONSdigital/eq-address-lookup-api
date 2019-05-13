@@ -5,7 +5,7 @@ from decimal import Decimal
 def get_env_or_fail(key):
     value = os.getenv(key)
     if value is None:
-        raise Exception("Setting '{}' Missing".format(key))
+        raise Exception(f'Setting "{key}" missing')
 
     return value
 
