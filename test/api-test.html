@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>AI Proxy Test UI</title>
+        <style>
+            body, html { background: #555; margin: 0px; padding: 0px 0px 20px; color: #eee; height: 100%;
+                font-family: Arial, Helvetica, sans-serif; }
+            h1 { padding-left: 1em; font-size: 1.8em; background: #666; margin-top: 0px; padding-top: 0.5em; }
+            h2 { padding-left: 1em; font-size: 1.3em; }
+            p { padding-left: 2em;}
+            #input-panel input { background: #eee; border: 2px solid #555;}
+            #status-panel { min-height: 1em; font-style: italic; padding: 0.5em; }
+            #export-panel { font-family: 'Courier New', Courier, monospace; }
+            .panel { padding-left: 1em; }
+        </style>
+    </head>
+    <body>
+        <h1>ai-proxy-test</h1>
+        <p>This is a <b>very</b> simple interface to demonstrate the function of, and capture basic timings of the eQ Address Index Proxy.</p>
+        <p>Start typing an address to look up in the box below. Once you reach five charaters, requests will be sent to the proxy, which sits in front of the GCP instance of the Addreess Index.</p>
+        <p>A maximum of ten results will be returned, along with the time taken for the proxy to receive an answer from the AI. The browser records the time taken for the request to complete from its perspective.</p>
+        <p>Once you have collected a set of data, you can hit the &quot;export&quot; button to get copyable CSV data (timings in ms) to put into a spreadsheet of your choice.</p>
+        <h2>Limitations</h2>
+        <p>Limitations include no reset (refresh the browser), and the potential for overlapping requests to be sent.</p>
+        <h2>Setup</h2>
+        <p>You will need an instance of the proxy set up, and configured to talk to the Address Index.</p>
+        <p>Edit the value of <code>PROXY_URL</code> in the JavaScript to point at the proxy instance.</p>
+        <div id="input-panel" class="panel"><input id="q" size="32" autocomplete="off">&nbsp;
+        <button id="export">export</button></div>
+        <div id="status-panel" class="panel"></div>
+        <div id="output-panel" class="panel"><ul></ul></div>
+        <div id="export-panel"></div>
+        <script>
+        (function() {
+            const PROXY_URL = "https://CHANGE_ME";
+            var status = document.querySelector("#status-panel");
+            var timeAvg = new Average();
+            var apiTimeAvg = new Average();
+            var searches = [];
+
+            document.querySelector("#export").addEventListener("click", (event) => {
+                var searchesText = 'QUERY,API_DURATION,AI_CALL_DURATION<br/>';
+                for (search of searches) {
+                    searchesText += '"' + search.q + '",' + search.dur
+                    + ',' + search.apiDur + '<br/>' + "\n";
+                }
+                document.querySelector("#export-panel").innerHTML = searchesText;
+            });
+
+            document.querySelector("#q").addEventListener("keyup", (event) => {
+                var textBox = event.target;
+                if (textBox.value.length >= 5) {
+                    var search = { "q": textBox.value };
+                    req = new XMLHttpRequest();
+                    req.onreadystatechange = function() {
+                        if(req.readyState === 4) {
+                            var dur = Date.now() - req.ts;
+                            search.dur = dur;
+                            
+                            if (req.status === 200) {
+                                ul = document.querySelector("#output-panel ul");
+                                while (ul.firstChild) {
+                                    ul.firstChild.remove();
+                                }
+                                reqj = JSON.parse(req.responseText);
+                                if (reqj.count > 0) {
+                                    for (address of reqj.addresses) {
+                                        li = document.createElement("li");
+                                        li.innerHTML = address;
+                                        ul.appendChild(li)
+                                    }
+                                }
+                                var apiTimeDur = Math.floor(reqj.time * 1000);
+                                search.apiDur = apiTimeDur;
+                                searches.push(search);
+                                status.innerHTML = reqj.count + " addresse(s) returned after "
+                                    + dur + "ms, running mean of " + (timeAvg.addDatum(dur)).toFixed(2)
+                                    + "ms<br/>"
+                                    + "(ai took " + apiTimeDur
+                                    + "ms, running mean of " + (apiTimeAvg.addDatum(apiTimeDur)).toFixed(2)
+                                    + "ms)";
+                                
+                            } else {
+                                status.innerHTML = "Status was: " + req.status;
+                            }
+                        } else if (req.readyState <= 1) {
+                            req.ts = Date.now();
+                        }
+
+                    }
+                    req.open("GET", PROXY_URL + '?q=' + encodeURI(textBox.value), true);
+                    req.send();
+                }
+            });
+            // Average class - maintains an arimetic mean
+            function Average() {
+                var count = 0;
+                var runningTotal = 0;
+                this.addDatum = function(obs) { count++; runningTotal += obs; return this.getAverage();};
+                this.getAverage = function() { return runningTotal / count; };
+            }
+        })();
+        </script>
+    </body>
+</html>
