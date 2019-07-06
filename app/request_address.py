@@ -45,12 +45,31 @@ def query_address_index(search_value):
         raise Exception('ERROR IN ADDRESS INDEX API (try refresh).'
                         f' Reason: {resp.reason}. Response: {resp.text}')
 
-    return dict(addresses=get_addresses(resp), time=g.address_index_response_time)
+    return dict(addresses=build_addresses(resp), time=g.address_index_response_time)
 
 
 def get_addresses(resp):
     addresses = []
     result = json.loads(resp.text)
+    logger.info('Getting addresses from Address Index response data', data=result)
     for address in result['response']['addresses']:
         addresses.append(address['formattedAddress'])
+    logger.info('Formatted data from eQ API', data=addresses)
     return addresses
+
+
+def build_addresses(resp):
+    addresses = []
+    result = json.loads(resp.text)
+    logger.info('Building addresses from Address Index response data', data=result)
+    for address_line in result['response']['addresses']:
+        address_fields = address_line['formattedAddress'].split(", ")
+        i = 0
+        address={}
+        for value in address_fields:
+            i = i + 1
+            key = 'field' + str(i)
+            address[key] = value
+        addresses.append(address)
+    logger.info('Formatted data from eQ API', data=addresses)
+    return json.dumps(addresses)
