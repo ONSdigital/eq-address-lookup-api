@@ -7,6 +7,7 @@ from flask_cors import CORS
 from structlog import get_logger
 
 from app.request_address import query_address_index
+from app.request_address import query_address_index_by_uprn
 
 logger = get_logger()
 
@@ -43,9 +44,14 @@ def status():
     return json.dumps(data)
 
 
-@app.route('/address_api/', methods=['GET'])
+@app.route('/address_api/', methods=['GET', 'POST'])
 def address_search():
-    query = request.args.get('q')
+
+    if request.method == 'POST':
+        query = request.form['q']
+    else:
+        query = request.args.get('q')
+
     if query:
         try:
             resp = query_address_index(query)
@@ -60,6 +66,29 @@ def address_search():
             return str(exception), 500
     else:
         return 'Enter address_api/?q=Address'
+
+@app.route('/uprn/', methods=['GET', 'POST'])
+def address_search_by_uprn():
+
+    if request.method == 'POST':
+        query = request.form['q']
+    else:
+        query = request.args.get('q')
+
+    if query:
+        try:
+            resp = query_address_index_by_uprn(query)
+            return dict(address=resp['address'], count=len(resp['address']), time=resp['time'])
+        except requests.exceptions.ConnectionError:
+            return 'ADDRESS INDEX API CONNECTION ERROR', 503
+        except requests.exceptions.ConnectTimeout:
+            return 'ADDRESS INDEX API CONNECTION TIMED OUT', 503
+        except requests.exceptions.ReadTimeout:
+            return 'ADDRESS INDEX API READ TIMED OUT', 408
+        except Exception as exception:
+            return str(exception), 500
+    else:
+        return 'Enter uprn/?q=uprn'
 
 
 if __name__ == '__main__':

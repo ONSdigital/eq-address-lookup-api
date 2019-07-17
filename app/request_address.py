@@ -48,14 +48,60 @@ def query_address_index(search_value):
     return dict(addresses=build_addresses(resp), time=g.address_index_response_time)
 
 
+def query_address_index_by_uprn(search_value):
+
+    request_string = f'{settings.LOOKUP_URL}/addresses/uprn/{search_value}?verbose=true'
+
+    logger.info('UPRN Request data from address index', url=request_string)
+
+    address_index_request_start = time.time()
+    headers = {'content-type': 'application/json'}
+    resp = requests.get(request_string,
+                        timeout=(settings.REQUEST_CONNECTION_TIMEOUT,
+                                 settings.REQUEST_READ_TIMEOUT),
+                        auth=(settings.AUTH_KEY, ''),
+                        headers=headers)
+    g.address_index_response_time = time.time() - address_index_request_start
+    logger.bind(address_index_response_time=g.address_index_response_time)
+
+    if resp.status_code != 200:
+        # This means something went wrong.
+        raise Exception('ERROR IN ADDRESS INDEX API (try refresh).'
+                        f' Reason: {resp.reason}. Response: {resp.text}')
+
+    return dict(address=build_address(resp), time=g.address_index_response_time)
+
+
 def get_addresses(resp):
     addresses = []
     result = json.loads(resp.text)
-    logger.info('Getting addresses from Address Index response data', data=result)
+    logger.info('Address Index API response data', data=result)
     for address in result['response']['addresses']:
         addresses.append(address['formattedAddress'])
-    logger.info('Formatted data from eQ API', data=addresses)
+    logger.info('eQ Address Lookup API response data', data=addresses)
     return addresses
+
+
+def build_address(resp):
+    result = json.loads(resp.text)
+    logger.info('UPRN Building address from Address Index response data', data=result)
+    address_response = result['response']['address']
+    address_fields = address_response['formattedAddress'].split(", ")
+    i = 0
+    address = {}
+    for value in address_fields:
+        i = i + 1
+        key = 'field' + str(i)
+        address[key] = value
+    address["uprn"] = address_response['uprn']
+    address["formattedAddress"] = address_response['formattedAddress']
+    address["welshFormattedAddressNag"] = address_response['welshFormattedAddressNag']
+    # There will be 0 or 1 paf
+    address["paf"] = address_response['paf']
+    # There will be >= 1 nag
+    address["nag"] = address_response['paf']
+    logger.info('UPRN Formatted data from eQ API', data=address)
+    return address
 
 
 def build_addresses(resp):
@@ -63,13 +109,9 @@ def build_addresses(resp):
     result = json.loads(resp.text)
     logger.info('Building addresses from Address Index response data', data=result)
     for address_line in result['response']['addresses']:
-        address_fields = address_line['formattedAddress'].split(", ")
-        i = 0
-        address={}
-        for value in address_fields:
-            i = i + 1
-            key = 'field' + str(i)
-            address[key] = value
+        address = {}
+        address["uprn"] = address_line['uprn']
+        address["text"] = address_line['formattedAddress']
         addresses.append(address)
     logger.info('Formatted data from eQ API', data=addresses)
-    return json.dumps(addresses)
+    return addresses
