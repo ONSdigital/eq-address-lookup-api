@@ -9,7 +9,7 @@ fi
 
 LOOKUP_URL=$1
 DOCKER_REGISTRY="${2:-eu.gcr.io/census-eq-ci}"
-IMAGE_TAG="${3:-latest}"
+IMAGE_TAG="${3:-pricem_v16}"
 
 helm tiller run \
     helm upgrade --install \
