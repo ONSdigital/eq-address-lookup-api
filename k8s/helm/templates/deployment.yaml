@@ -24,32 +24,16 @@ spec:
         app.kubernetes.io/name: {{ .Chart.Name }}
         app.kubernetes.io/instance: {{ .Release.Name }}
     spec:
-      volumes:
-      - name: keys
-        secret:
-          secretName: keys
-      - name: secrets
-        secret:
-          secretName: secrets
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - containerPort: 6030
+            - containerPort: 8000
           readinessProbe:
             httpGet:
               path: /status
-              port: 6030
-          resources:
-            {{- toYaml .Values.resources | nindent 12 }}
-          volumeMounts:
-            - name: keys
-              mountPath: "/keys"
-              readOnly: true
-            - name: secrets
-              mountPath: "/secrets"
-              readOnly: true
+              port: 8000
           env:
             - name: LOOKUP_URL
               value: "http://{{ .Values.lookup_url }}"
