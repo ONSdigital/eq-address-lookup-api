@@ -15,11 +15,6 @@ service:
 
 ingress:
   enabled: true
-  annotations:
-    kubernetes.io/ingress.global-static-ip-name: address-lookup-api
-    kubernetes.io/ingress.allow-http: "false"
-  tls:
-    - secretName: tls-cert
 
 resources:
   cpu: "3"

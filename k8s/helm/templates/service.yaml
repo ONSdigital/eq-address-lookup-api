@@ -1,11 +1,3 @@
-apiVersion: cloud.google.com/v1beta1
-kind: BackendConfig
-metadata:
-  name: ons-only
-spec:
-  securityPolicy:
-    name: "ons-only"
----
 apiVersion: v1
 kind: Service
 metadata:
@@ -17,12 +9,11 @@ metadata:
     app.kubernetes.io/managed-by: {{ .Release.Service }}
   annotations:
     cloud.google.com/neg: '{"ingress": true}'
-    beta.cloud.google.com/backend-config: '{"ports": {"6030":"ons-only"}}'
 spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: 6030
+      targetPort: 8000
       protocol: TCP
       name: http
   selector:
