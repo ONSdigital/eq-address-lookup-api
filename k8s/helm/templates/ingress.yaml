@@ -1,0 +1,19 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ .Chart.Name }}
+  labels:
+    app.kubernetes.io/name: {{ .Chart.Name }}
+    helm.sh/chart: {{ include "chart.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: address-lookup-api
+    ingress.gcp.kubernetes.io/pre-shared-cert: address-lookup-api
+    kubernetes.io/ingress.allow-http: "false"
+spec:
+  backend:
+    serviceName: {{ .Chart.Name }}
+    servicePort: 80
+{{- end }}
